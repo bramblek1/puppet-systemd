@@ -88,8 +88,6 @@ class systemd (
   Hash[String,String]                                $accounting,
 ){
 
-  contain systemd::systemctl::daemon_reload
-
   create_resources('systemd::service_limits', $service_limits)
 
   if $manage_resolved and $facts['systemd_internal_services'] and $facts['systemd_internal_services']['systemd-resolved.service'] {

@@ -55,7 +55,9 @@ define systemd::dropin_file(
     })
   }
 
-  file { "${path}/${unit}.d/${filename}":
+  $dropin_name = "${path}/${unit}.d/${filename}"
+  $reload_name = "drop-in ${dropin_name}"
+  file { $dropin_name:
     ensure  => $_ensure,
     content => $content,
     source  => $source,
@@ -63,6 +65,8 @@ define systemd::dropin_file(
     owner   => 'root',
     group   => 'root',
     mode    => '0444',
-    notify  => Class['systemd::systemctl::daemon_reload'],
+    notify  => Systemd::Systemctl::Daemon_reload[$reload_name],
   }
+
+  systemd::systemctl::daemon_reload { $reload_name: }
 }

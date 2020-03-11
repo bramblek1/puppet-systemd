@@ -55,7 +55,10 @@ define systemd::unit_file(
     }
   }
 
-  file { "${path}/${name}":
+  $unit_name = "${path}/${name}"
+  $reload_name = "unit ${unit_name}"
+
+  file { $unit_name:
     ensure  => $_ensure,
     content => $content,
     source  => $source,
@@ -63,16 +66,17 @@ define systemd::unit_file(
     owner   => 'root',
     group   => 'root',
     mode    => '0444',
-    notify  => Class['systemd::systemctl::daemon_reload'],
+    notify  => Systemd::Systemctl::Daemon_reload[$reload_name],
   }
+
+  systemd::systemctl::daemon_reload { $reload_name: }
 
   if $enable != undef or $active != undef {
     service { $name:
       ensure    => $active,
       enable    => $enable,
       provider  => 'systemd',
-      subscribe => File["${path}/${name}"],
-      require   => Class['systemd::systemctl::daemon_reload'],
+      subscribe => File[$unit_name]
     }
   }
 }
